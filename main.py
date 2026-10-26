@@ -1,10 +1,10 @@
-from service.corrida_service import CorridaService
+from service.corrida_service import CorridaService #importa do arquivo corridaservice
 
 
 def main():
-    service = CorridaService()
+    service = CorridaService()   # Cria uma instância do serviço de corrida
 
-    # Escolha o Grande Prêmio
+    # Escolha o Grande Prêmio - ano e país para consultar
     ano = 2023
     pais = "Brazil"
 
@@ -51,4 +51,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()   #Executa a função main quando o script é executado diretamente

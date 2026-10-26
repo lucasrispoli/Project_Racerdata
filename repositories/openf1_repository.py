@@ -2,10 +2,10 @@ import requests
 
 
 class OpenF1Repository:
-    BASE_URL = "https://api.openf1.org/v1"
+    BASE_URL = "https://api.openf1.org/v1"     #utilia a api da formula 1 para consultar os dados disponiveis
 
     def _buscar_dados(self, endpoint, parametros=None):
-        """Executa uma consulta à API e retorna os dados."""
+        #Executa uma consulta à API e retorna os dados.
         url = f"{self.BASE_URL}/{endpoint}"
 
         resposta = requests.get(
@@ -18,13 +18,13 @@ class OpenF1Repository:
         return resposta.json()
 
     def buscar_sessoes(self, parametros=None):
-        return self._buscar_dados("sessions", parametros)
+        return self._buscar_dados("sessions", parametros)    
 
     def buscar_reunioes(self, parametros=None):
         return self._buscar_dados("meetings", parametros)
 
     def buscar_pilotos(self, parametros=None):
-        return self._buscar_dados("drivers", parametros)
+        return self._buscar_dados("drivers", parametros)            
 
     def buscar_voltas(self, parametros=None):
         return self._buscar_dados("laps", parametros)

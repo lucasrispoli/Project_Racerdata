@@ -17,3 +17,5 @@ class Piloto:
 
     def __repr__(self):
         return f"Piloto(id={self.id}, nome='{self.nome}')"
+
+#representa um piloto e seus atributos

@@ -4,10 +4,10 @@ from datetime import date
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from service.corrida_service import CorridaService
+from service.corrida_service import CorridaService    #Recebe os parâmetros enviados pelo cliente e chama o CorridaService.
 
 
-router = APIRouter(prefix="/analises", tags=["Análises"])
+router = APIRouter(prefix="/analises", tags=["Análises"])   #rotas para se usar a API de análises de corridas e qualificações   
 service = CorridaService()
 
 

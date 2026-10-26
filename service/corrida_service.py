@@ -9,18 +9,20 @@ from models.dto.historico_qualy_dto import HistoricoQualyDTO
 from models.dto.ranking_qualy_dto import RankingQualyDTO
 
 
-class CorridaService:
+class CorridaService:     #regras de negocio 
     def __init__(self):
         self.repository = CorridaRepository()
 
     def _validar_periodo(self, inicio, fim):
         if inicio > fim:
-            raise ValueError(
+            raise ValueError(            
+                   #valida se a data inicial é maior que a data final, caso seja, retorna o erro 400 com a mensagem
                 "A data inicial não pode ser posterior à data final."
             )
 
         if fim > date.today():
-            raise ValueError("A data final não pode ser futura.")
+            raise ValueError("A data final não pode ser futura.")   
+        #valida se a data final é maior que a data atual, caso seja, retorna o erro 400 com a mensagem
 
     def _obter_posicoes(self, session_key):
         registros = self.repository.buscar_resultados_da_sessao(

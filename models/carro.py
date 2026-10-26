@@ -4,4 +4,5 @@ class Carro:
          self.piloto = piloto
          self.marca = marca
          self.categoria = categoria
-     
+
+     #representa um carro e seus atributos

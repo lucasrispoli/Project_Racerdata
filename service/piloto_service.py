@@ -2,7 +2,7 @@
 from repositories.piloto_repository import PilotoRepository
 
 
-class PilotoService:
+class PilotoService:    #cordena as consultas
     def __init__(self):
         self.repository = PilotoRepository()
 

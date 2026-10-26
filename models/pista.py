@@ -5,3 +5,5 @@ class pista:
         self.pilotos = pilotos
         self.temperatura = temperatura
         self.tempo_corrida = tempo_corrida
+
+        #representa uma pista e seus atributos

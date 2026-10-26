@@ -4,3 +4,6 @@ class volta:
         self.melhor_volta = melhor_volta
         self.tempo_medio = tempo_medio
         self.tempo_total = tempo_total
+
+
+        #representa uma volta e seus atributos

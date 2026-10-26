@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from service.piloto_service import PilotoService
 
-router = APIRouter(prefix="/pilotos", tags=["Pilotos"])
+router = APIRouter(prefix="/pilotos", tags=["Pilotos"])  #rotas para se usar a API de pilotos
 service = PilotoService()
 
 
@@ -31,7 +31,7 @@ def listar_pilotos():
 @router.get("/{piloto_id}")
 def buscar_piloto(piloto_id: str):
     piloto = service.buscar_por_id(piloto_id)
-    if piloto is None:
+    if piloto is None:                          #tratamento de de erros caso o piloto digitado nao seja encontrado
         raise HTTPException(404, "Piloto não encontrado")
     return piloto
 
@@ -42,7 +42,7 @@ def atualizar_piloto(piloto_id: str, dados: PilotoEntrada):
         piloto_id, dados.nome, dados.descricao, dados.active
     )
     if piloto is None:
-        raise HTTPException(404, "Piloto não encontrado")
+        raise HTTPException(404, "Piloto não encontrado")   
     return piloto
 
 
