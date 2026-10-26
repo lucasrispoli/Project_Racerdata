@@ -1,46 +1,60 @@
-from repositories.openf1_repository import OpenF1Repository
+
+from datetime import date
+
+from repositories.corrida_collector import CorridaCollector
 
 
 class CorridaRepository:
     def __init__(self):
-        self.api = OpenF1Repository()
+        self.collector = CorridaCollector()
 
     def buscar_corrida(self, ano, pais):
-        parametros = {
-            "year": ano,
-            "country_name": pais,
-            "session_name": "Race"
-        }
+        sessoes = self.collector.buscar_corridas(ano)
 
-        sessoes = self.api.buscar_sessoes(parametros)
+        for sessao in sessoes:
+            if sessao.get("country_name") == pais:
+                return sessao
 
-        if not sessoes:
-            return None
-
-        return sessoes[0]
+        return None
 
     def buscar_dados_gp(self, meeting_key):
-        parametros = {
-            "meeting_key": meeting_key
-        }
-
-        dados = self.api.buscar_reunioes(parametros)
-
-        if not dados:
-            return None
-
-        return dados[0]
+        dados = self.collector.buscar_dados_gp(meeting_key)
+        return dados[0] if dados else None
 
     def buscar_pilotos_da_corrida(self, session_key):
-        parametros = {
-            "session_key": session_key
-        }
-
-        return self.api.buscar_pilotos(parametros)
+        return self.collector.buscar_pilotos_sessao(session_key)
 
     def buscar_voltas_da_corrida(self, session_key):
-        parametros = {
-            "session_key": session_key
-        }
+        return self.collector.buscar_voltas(session_key)
 
-        return self.api.buscar_voltas(parametros)
+    def buscar_sessoes_por_periodo(
+        self, data_inicio, data_fim, tipo_sessao
+    ):
+        if data_inicio > data_fim:
+            raise ValueError(
+                "A data inicial não pode ser posterior à data final."
+            )
+
+        sessoes_encontradas = []
+
+        for ano in range(data_inicio.year, data_fim.year + 1):
+            if tipo_sessao == "Race":
+                sessoes = self.collector.buscar_corridas(ano)
+            else:
+                sessoes = self.collector.buscar_qualificacoes(ano)
+
+            for sessao in sessoes:
+                data_texto = sessao.get("date_start")
+
+                if not data_texto:
+                    continue
+
+                data_sessao = date.fromisoformat(data_texto[:10])
+
+                if data_inicio <= data_sessao <= data_fim:
+                    sessoes_encontradas.append(sessao)
+
+        return sessoes_encontradas
+
+    def buscar_resultados_da_sessao(self, session_key):
+        return self.collector.buscar_posicoes_sessao(session_key)
