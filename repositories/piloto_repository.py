@@ -1,4 +1,3 @@
-
 from models.piloto import Piloto
 from uuid import uuid4
 
@@ -42,7 +41,10 @@ class PilotoRepository:
         return piloto
 
     def excluir(self, piloto_id):
-        return self.pilotos.pop(piloto_id, None) is not None
+        if piloto_id in self.pilotos:
+            del self.pilotos[piloto_id]
+            return True
+        return False
 
     def alterar_status(self, piloto_id):
         piloto = self.buscar_por_id(piloto_id)

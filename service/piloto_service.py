@@ -1,10 +1,10 @@
+from repositorios_compartilhados import piloto_repository
 
-from repositories.piloto_repository import PilotoRepository
 
-
-class PilotoService:    #cordena as consultas
+class PilotoService:  # cordena as consultas
     def __init__(self):
-        self.repository = PilotoRepository()
+        # usa o repository compartilhado (o mesmo do TelemetriaService)
+        self.repository = piloto_repository
 
     def criar_piloto(self, nome, descricao, active=True):
         if not nome.strip():

@@ -1,5 +1,5 @@
-class adversario:
-    def __init__(nome, carro, numero, categoria, distancia):
+class Adversario:
+    def __init__(self, nome, carro, numero, categoria, distancia):
         self.nome = nome
         self.carro = carro            
         self.numero = numero    

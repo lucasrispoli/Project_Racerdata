@@ -1,4 +1,3 @@
-
 from datetime import date
 
 from repositories.corrida_repository import CorridaRepository
@@ -9,26 +8,32 @@ from models.dto.historico_qualy_dto import HistoricoQualyDTO
 from models.dto.ranking_qualy_dto import RankingQualyDTO
 
 
-class CorridaService:     #regras de negocio 
+def pegar_pontos(item):
+    # item é uma tupla (nome, pontos); devolve só os pontos
+    return item[1]
+
+
+class CorridaService:
     def __init__(self):
         self.repository = CorridaRepository()
 
     def _validar_periodo(self, inicio, fim):
+        # data inicial não pode ser maior que a data final
         if inicio > fim:
-            raise ValueError(            
-                   #valida se a data inicial é maior que a data final, caso seja, retorna o erro 400 com a mensagem
+            raise ValueError(
                 "A data inicial não pode ser posterior à data final."
             )
 
+        # data final não pode ser no futuro
         if fim > date.today():
-            raise ValueError("A data final não pode ser futura.")   
-        #valida se a data final é maior que a data atual, caso seja, retorna o erro 400 com a mensagem
+            raise ValueError("A data final não pode ser futura.")
 
     def _obter_posicoes(self, session_key):
         registros = self.repository.buscar_resultados_da_sessao(
             session_key
         )
 
+        # guarda, para cada piloto, a posição mais recente da sessão
         ultimos = {}
 
         for registro in registros:
@@ -47,10 +52,12 @@ class CorridaService:     #regras de negocio
                     "position": posicao
                 }
 
-        return {
-            numero: dados["position"]
-            for numero, dados in ultimos.items()
-        }
+        # devolve só numero -> posição
+        posicoes = {}
+        for numero in ultimos:
+            posicoes[numero] = ultimos[numero]["position"]
+
+        return posicoes
 
     def _dados_historico(self, nomes, inicio, fim, tipo):
         self._validar_periodo(inicio, fim)
@@ -70,23 +77,29 @@ class CorridaService:     #regras de negocio
             )
             posicoes = self._obter_posicoes(session_key)
 
-            por_nome = {
-                p.get("full_name"): p.get("driver_number")
-                for p in pilotos
-            }
+            # nome do piloto -> número do piloto
+            por_nome = {}
+            for p in pilotos:
+                por_nome[p.get("full_name")] = p.get("driver_number")
 
-            # Só inclui sessões em que todos os pilotos selecionados
-            # participaram.
-            if not all(nome in por_nome for nome in nomes):
+            # só inclui sessões em que todos os pilotos selecionados participaram
+            
+            todos_participaram = True
+            for nome in nomes:
+                if nome not in por_nome:
+                    todos_participaram = False
+
+            if not todos_participaram:
                 continue
 
             data_corrida = sessao.get("date_start", "")[:10]
             meeting_key = sessao.get("meeting_key")
             gp = self.repository.buscar_dados_gp(meeting_key)
-            nome_gp = (
-                gp.get("meeting_name")
-                if gp else sessao.get("country_name", "GP desconhecido")
-            )
+
+            if gp:
+                nome_gp = gp.get("meeting_name")
+            else:
+                nome_gp = sessao.get("country_name", "GP desconhecido")
 
             for nome in nomes:
                 numero = por_nome[nome]
@@ -103,10 +116,11 @@ class CorridaService:     #regras de negocio
             pilotos, data_inicio, data_fim, "Race"
         )
 
-        return [
-            HistoricoCorridaDTO(nome, posicao, gp, data)
-            for nome, posicao, gp, data in dados
-        ]
+        resultado = []
+        for nome, posicao, gp, data in dados:
+            resultado.append(HistoricoCorridaDTO(nome, posicao, gp, data))
+
+        return resultado
 
     def buscar_historico_qualificacoes(
         self, pilotos, data_inicio, data_fim
@@ -115,18 +129,23 @@ class CorridaService:     #regras de negocio
             pilotos, data_inicio, data_fim, "Qualifying"
         )
 
-        return [
-            HistoricoQualyDTO(nome, posicao, gp, data)
-            for nome, posicao, gp, data in dados
-        ]
+        resultado = []
+        for nome, posicao, gp, data in dados:
+            resultado.append(HistoricoQualyDTO(nome, posicao, gp, data))
 
-    def _ranking(self, nomes, inicio, fim, tipo, dto):
+        return resultado
+
+    def _ranking(self, nomes, inicio, fim, tipo):
         self._validar_periodo(inicio, fim)
 
         sessoes = self.repository.buscar_sessoes_por_periodo(
             inicio, fim, tipo
         )
-        pontos = {nome: 0 for nome in nomes}
+
+        # todo mundo começa com 0 pontos
+        pontos = {}
+        for nome in nomes:
+            pontos[nome] = 0
 
         for sessao in sessoes:
             session_key = sessao.get("session_key")
@@ -138,47 +157,61 @@ class CorridaService:     #regras de negocio
             )
             posicoes = self._obter_posicoes(session_key)
 
-            por_nome = {
-                p.get("full_name"): p.get("driver_number")
-                for p in participantes
-            }
+            # nome do piloto -> número do piloto
+            por_nome = {}
+            for p in participantes:
+                por_nome[p.get("full_name")] = p.get("driver_number")
 
-            presentes = {
-                nome: posicoes[por_nome[nome]]
-                for nome in nomes
-                if nome in por_nome and por_nome[nome] in posicoes
-            }
+            # nome -> posição, só dos pilotos que estão nesta sessão
+            presentes = {}
+            for nome in nomes:
+                if nome in por_nome:
+                    numero = por_nome[nome]
+                    if numero in posicoes:
+                        presentes[nome] = posicoes[numero]
 
+            # quem terminou à frente do outro ganha 1 ponto
             for nome in presentes:
                 for outro in presentes:
                     if nome != outro and presentes[nome] < presentes[outro]:
                         pontos[nome] += 1
 
-        ordenados = sorted(
-            pontos.items(),
-            key=lambda item: (-item[1], item[0])
-        )
+        return pontos
 
-        return [
-            dto(piloto=nome, qtd_melhor_resultado=pontuacao)
-            for nome, pontuacao in ordenados
-        ]
+    def _ordenar(self, pontos):
+        lista = list(pontos.items())
+        lista.sort()  # primeiro em ordem alfabética (desempate)
+        lista.sort(key=pegar_pontos, reverse=True)  # depois mais pontos primeiro
+        return lista
 
     def gerar_ranking_corridas(self, pilotos, data_inicio, data_fim):
-        return self._ranking(
-            pilotos, data_inicio, data_fim,
-            "Race", RankingCorridaDTO
-        )
+        pontos = self._ranking(pilotos, data_inicio, data_fim, "Race")
+
+        resultado = []
+        for nome, pontuacao in self._ordenar(pontos):
+            resultado.append(
+                RankingCorridaDTO(
+                    piloto=nome, qtd_melhor_resultado=pontuacao
+                )
+            )
+
+        return resultado
 
     def gerar_ranking_qualificacoes(
         self, pilotos, data_inicio, data_fim
     ):
-        return self._ranking(
-            pilotos, data_inicio, data_fim,
-            "Qualifying", RankingQualyDTO
-        )
+        pontos = self._ranking(pilotos, data_inicio, data_fim, "Qualifying")
 
-    # Mantém a consulta de GP que você já usava no main.py.
+        resultado = []
+        for nome, pontuacao in self._ordenar(pontos):
+            resultado.append(
+                RankingQualyDTO(
+                    piloto=nome, qtd_melhor_resultado=pontuacao
+                )
+            )
+
+        return resultado
+
     def buscar_dados_corrida(self, ano, pais):
         corrida = self.repository.buscar_corrida(ano, pais)
 
