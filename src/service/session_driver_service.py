@@ -1,10 +1,10 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from entity.models import SessionDriver as SessionDriverModel
+from entity.session_driver import SessionDriver as SessionDriverModel
 from repository.session_driver_repository import SessionDriverRepository
 from repository.session_repository import SessionRepository
 from repository.driver_repository import DriverRepository
-from dto.models_dto import SessionDriverCreateDto, SessionDriverUpdateDto, SessionDriverDto
+from dto.session_driver_dto import SessionDriverCreateDto, SessionDriverUpdateDto, SessionDriverDto
 
 
 class SessionDriverService:

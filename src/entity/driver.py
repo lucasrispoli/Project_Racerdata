@@ -1,15 +1,18 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, Text
+from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
+
 from config.database import Base
 
 
 class Driver(Base):
+    """
+    Entidade Driver: cadastro principal e único dos pilotos
+    """
     __tablename__ = "driver"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = Column(String(100), nullable=False, unique=True, index=True)
-    description = Column(Text, nullable=True)
-    active = Column(Boolean, nullable=False, default=True)
+    driver_name = Column(String(100), unique=True, nullable=False, index=True)
 
-    def __repr__(self):
-        return f"<Driver(id='{self.id}', name='{self.name}', active={self.active})>"
+    session_drivers = relationship("SessionDriver", back_populates="driver", cascade="all, delete-orphan")
+    dashboard_driver = relationship("DashboardDriver", back_populates="driver", uselist=False, cascade="all, delete-orphan")

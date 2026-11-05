@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from config.database import get_db
-from dto.models_dto import DriverCreateDto, DriverUpdateDto, DriverDto
+from dto.driver_dto import DriverCreateDto, DriverUpdateDto, DriverDto
 from service.driver_service import DriverService
 
 router = APIRouter(prefix="/driver-entities", tags=["Driver Entities"])

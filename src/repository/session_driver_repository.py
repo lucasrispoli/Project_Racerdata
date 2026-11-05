@@ -1,6 +1,6 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session, joinedload
-from entity.models import SessionDriver as SessionDriverModel
+from entity.session_driver import SessionDriver as SessionDriverModel
 
 
 class SessionDriverRepository:

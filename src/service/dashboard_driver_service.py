@@ -1,9 +1,10 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from entity.models import DashboardDriver as DashboardDriverModel, Driver as DriverModel
+from entity.dashboard_driver import DashboardDriver as DashboardDriverModel
+from entity.driver import Driver as DriverModel
 from repository.dashboard_driver_repository import DashboardDriverRepository
 from repository.driver_repository import DriverRepository
-from dto.models_dto import (
+from dto.dashboard_driver_dto import (
     DashboardDriverInputDto,
     DashboardDriverUpdateDto,
     DashboardDriverStatusDto,
@@ -17,14 +18,12 @@ class DashboardDriverService:
         self._driver_repo = DriverRepository(session)
 
     def create(self, dto: DashboardDriverInputDto) -> DashboardDriverDto:
-        # Se veio driver_id ou name/driver_name
         driver_id = dto.driver_id
         driver_name = (dto.driver_name or dto.name or "").strip()
 
         if not driver_id:
             if not driver_name:
                 raise ValueError("Driver name or driver ID is required.")
-            # Localiza ou cadastra o Driver
             driver_obj = self._driver_repo.get_by_name(driver_name)
             if not driver_obj:
                 driver_obj = self._driver_repo.create(DriverModel(driver_name=driver_name))
@@ -34,7 +33,6 @@ class DashboardDriverService:
             if not driver_obj:
                 raise ValueError(f"Driver with id '{driver_id}' not found.")
 
-        # Verifica unicidade no DashboardDriver
         existing = self._repository.get_by_driver_id(driver_id)
         if existing:
             raise ValueError(f"Dashboard configuration for driver '{driver_obj.driver_name}' already exists.")
@@ -69,7 +67,6 @@ class DashboardDriverService:
         if not entity:
             return None
 
-        # Permite atualizar nome do piloto associado se informado
         name_val = getattr(dto, "driver_name", None) or getattr(dto, "name", None)
         if name_val and entity.driver:
             name_val = name_val.strip()

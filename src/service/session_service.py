@@ -1,8 +1,8 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from entity.models import Session as SessionModel
+from entity.session import Session as SessionModel
 from repository.session_repository import SessionRepository
-from dto.models_dto import SessionCreateDto, SessionUpdateDto, SessionDto
+from dto.session_dto import SessionCreateDto, SessionUpdateDto, SessionDto
 
 
 class SessionService:

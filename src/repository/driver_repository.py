@@ -1,6 +1,6 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from entity.models import Driver as DriverModel
+from entity.driver import Driver as DriverModel
 
 
 class DriverRepository:

@@ -1,6 +1,6 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session, joinedload
-from entity.models import DashboardDriver as DashboardDriverModel
+from entity.dashboard_driver import DashboardDriver as DashboardDriverModel
 
 
 class DashboardDriverRepository:

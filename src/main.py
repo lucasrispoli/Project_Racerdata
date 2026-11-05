@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config.database import engine, Base
-import entity.models  # Registra todas as entidades SQLAlchemy no Base metadata
+import entity  # Importa o pacote de entidades (Session, Driver, SessionDriver, DashboardDriver)
 
 from controller.session_controller import router as session_router
 from controller.driver_controller import router as driver_router
@@ -14,7 +14,6 @@ from controller.dashboard_controller import router as dashboard_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Inicializa as tabelas no PostgreSQL se não existirem
     try:
         Base.metadata.create_all(bind=engine)
     except Exception as e:
@@ -37,7 +36,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Registra todos os controllers requeridos
 app.include_router(dashboard_router)
 app.include_router(dashboard_driver_router)
 app.include_router(alias_dashboard_driver_router)

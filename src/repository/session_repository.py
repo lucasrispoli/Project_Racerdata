@@ -1,6 +1,6 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from entity.models import Session as SessionModel
+from entity.session import Session as SessionModel
 
 
 class SessionRepository:

@@ -1,8 +1,8 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from entity.models import Driver as DriverModel
+from entity.driver import Driver as DriverModel
 from repository.driver_repository import DriverRepository
-from dto.models_dto import DriverCreateDto, DriverUpdateDto, DriverDto
+from dto.driver_dto import DriverCreateDto, DriverUpdateDto, DriverDto
 
 
 class DriverService:

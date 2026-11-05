@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from config.database import get_db
-from dto.models_dto import (
+from dto.dashboard_driver_dto import (
     DashboardDriverInputDto,
     DashboardDriverUpdateDto,
     DashboardDriverStatusDto,
@@ -11,7 +11,6 @@ from dto.models_dto import (
 )
 from service.dashboard_driver_service import DashboardDriverService
 
-# Mantém o prefixo /drivers para compatibilidade com o frontend existente, e também expõe /dashboard-drivers
 router = APIRouter(prefix="/drivers", tags=["Dashboard Drivers"])
 alias_router = APIRouter(prefix="/dashboard-drivers", tags=["Dashboard Drivers Alias"])
 

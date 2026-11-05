@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from config.database import get_db
-from dto.models_dto import SessionCreateDto, SessionUpdateDto, SessionDto
+from dto.session_dto import SessionCreateDto, SessionUpdateDto, SessionDto
 from service.session_service import SessionService
 
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
