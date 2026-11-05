@@ -13,19 +13,20 @@ class SessionRepository:
     def get_by_session_key(self, session_key: int) -> Optional[SessionModel]:
         return self._db.query(SessionModel).filter(SessionModel.session_key == session_key).first()
 
-    def get_all(
-        self,
-        year: Optional[int] = None,
-        session_type: Optional[str] = None,
-        country_name: Optional[str] = None,
-    ) -> List[SessionModel]:
+    def get_by_year(self, year: int) -> List[SessionModel]:
+        return self._db.query(SessionModel).filter(SessionModel.year == year).order_by(SessionModel.date_start.asc()).all()
+
+    def get_by_session_type(self, session_type: str) -> List[SessionModel]:
+        return self._db.query(SessionModel).filter(SessionModel.session_type.ilike(f"%{session_type}%")).order_by(SessionModel.date_start.asc()).all()
+
+    def get_all(self, filter_text: Optional[str] = None) -> List[SessionModel]:
         query = self._db.query(SessionModel)
-        if year:
-            query = query.filter(SessionModel.year == year)
-        if session_type:
-            query = query.filter(SessionModel.session_type.ilike(f"%{session_type}%"))
-        if country_name:
-            query = query.filter(SessionModel.country_name.ilike(f"%{country_name}%"))
+        if filter_text:
+            query = query.filter(
+                SessionModel.session_name.ilike(f"%{filter_text}%") |
+                SessionModel.country_name.ilike(f"%{filter_text}%") |
+                SessionModel.circuit_short_name.ilike(f"%{filter_text}%")
+            )
         return query.order_by(SessionModel.date_start.asc()).all()
 
     def create(self, session_entity: SessionModel) -> SessionModel:

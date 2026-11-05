@@ -1,6 +1,7 @@
 from typing import Optional, List
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 from entity.dashboard_driver import DashboardDriver as DashboardDriverModel
+from entity.driver import Driver as DriverModel
 
 
 class DashboardDriverRepository:
@@ -10,7 +11,6 @@ class DashboardDriverRepository:
     def get_by_id(self, dashboard_driver_id: str) -> Optional[DashboardDriverModel]:
         return (
             self._db.query(DashboardDriverModel)
-            .options(joinedload(DashboardDriverModel.driver))
             .filter(DashboardDriverModel.id == dashboard_driver_id)
             .first()
         )
@@ -18,29 +18,25 @@ class DashboardDriverRepository:
     def get_by_driver_id(self, driver_id: str) -> Optional[DashboardDriverModel]:
         return (
             self._db.query(DashboardDriverModel)
-            .options(joinedload(DashboardDriverModel.driver))
             .filter(DashboardDriverModel.driver_id == driver_id)
             .first()
         )
 
-    def get_all(
-        self,
-        is_active: Optional[bool] = None,
-        filter_text: Optional[str] = None
-    ) -> List[DashboardDriverModel]:
-        query = (
-            self._db.query(DashboardDriverModel)
-            .options(joinedload(DashboardDriverModel.driver))
-        )
-        if is_active is not None:
-            query = query.filter(DashboardDriverModel.isActive == is_active)
+    def get_all(self, filter_text: Optional[str] = None) -> List[DashboardDriverModel]:
+        query = self._db.query(DashboardDriverModel).join(DashboardDriverModel.driver)
         if filter_text:
-            query = query.join(DashboardDriverModel.driver).filter(
-                DashboardDriverModel.driver.has(
-                    DashboardDriverModel.driver.property.mapper.class_.driver_name.ilike(f"%{filter_text}%")
-                )
+            query = query.filter(
+                DriverModel.driver_name.ilike(f"%{filter_text}%") |
+                DashboardDriverModel.description.ilike(f"%{filter_text}%")
             )
         return query.all()
+
+    def get_active_drivers(self) -> List[DashboardDriverModel]:
+        return (
+            self._db.query(DashboardDriverModel)
+            .filter(DashboardDriverModel.isActive == True)
+            .all()
+        )
 
     def create(self, entity: DashboardDriverModel) -> DashboardDriverModel:
         self._db.add(entity)

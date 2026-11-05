@@ -6,9 +6,7 @@ from config.database import Base
 
 
 class Session(Base):
-    """
-    Entidade Session: armazena as sessões da OpenF1
-    """
+  
     __tablename__ = "session"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

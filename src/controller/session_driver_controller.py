@@ -1,9 +1,11 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from config.database import get_db
-from dto.session_driver_dto import SessionDriverCreateDto, SessionDriverUpdateDto, SessionDriverDto
+from dto.session_driver_dto import SessionDriverDto
+from dto.session_driver_line_chart_dto import SessionDriverLineChartDto
+from dto.session_driver_results_dto import SessionDriverResultsDto
 from service.session_driver_service import SessionDriverService
 
 router = APIRouter(prefix="/session-drivers", tags=["Session Drivers"])
@@ -13,43 +15,36 @@ def get_service(db: Session = Depends(get_db)) -> SessionDriverService:
     return SessionDriverService(db)
 
 
-@router.post("", response_model=SessionDriverDto, status_code=status.HTTP_201_CREATED)
-def create_session_driver(dto: SessionDriverCreateDto, service: SessionDriverService = Depends(get_service)):
-    try:
-        return service.create(dto)
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+@router.get("/line-chart", response_model=List[SessionDriverLineChartDto])
+def get_drivers_for_line_chart(
+    date_from: Optional[str] = Query(None, description="Data inicial no formato YYYY-MM-DD"),
+    date_to: Optional[str] = Query(None, description="Data final no formato YYYY-MM-DD"),
+    service: SessionDriverService = Depends(get_service)
+):
+    return service.get_drivers_for_line_chart(date_from=date_from, date_to=date_to)
+
+
+@router.get("/results", response_model=List[SessionDriverResultsDto])
+def get_all_results(
+    year: Optional[int] = Query(None, description="Filtrar por ano da sessão"),
+    date_from: Optional[str] = Query(None, description="Data inicial no formato YYYY-MM-DD"),
+    date_to: Optional[str] = Query(None, description="Data final no formato YYYY-MM-DD"),
+    service: SessionDriverService = Depends(get_service)
+):
+    return service.get_all_results(year=year, date_from=date_from, date_to=date_to)
 
 
 @router.get("", response_model=List[SessionDriverDto])
-def get_all_session_drivers(
-    year: Optional[int] = Query(None),
-    driver_id: Optional[str] = Query(None),
-    team_name: Optional[str] = Query(None),
+def get_all(
+    filter_text: Optional[str] = Query(None, description="Filtro por nome de equipe ou piloto"),
     service: SessionDriverService = Depends(get_service)
 ):
-    return service.get_all(year=year, driver_id=driver_id, team_name=team_name)
+    return service.get_all(filter_text=filter_text)
 
 
 @router.get("/{session_driver_id}", response_model=SessionDriverDto)
-def get_session_driver_by_id(session_driver_id: str, service: SessionDriverService = Depends(get_service)):
-    dto = service.get_by_id(session_driver_id)
-    if not dto:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SessionDriver not found")
-    return dto
-
-
-@router.put("/{session_driver_id}", response_model=SessionDriverDto)
-def update_session_driver(session_driver_id: str, dto: SessionDriverUpdateDto, service: SessionDriverService = Depends(get_service)):
-    updated = service.update(session_driver_id, dto)
-    if not updated:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SessionDriver not found")
-    return updated
-
-
-@router.delete("/{session_driver_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_session_driver(session_driver_id: str, service: SessionDriverService = Depends(get_service)):
-    deleted = service.delete(session_driver_id)
-    if not deleted:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SessionDriver not found")
-    return None
+def get_by_id(
+    session_driver_id: str,
+    service: SessionDriverService = Depends(get_service)
+):
+    return service.get_by_id(session_driver_id)

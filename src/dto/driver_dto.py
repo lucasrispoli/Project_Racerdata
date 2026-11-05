@@ -1,16 +1,15 @@
 from pydantic import BaseModel, ConfigDict
 
 
-class DriverCreateDto(BaseModel):
-    driver_name: str
-
-
-class DriverUpdateDto(BaseModel):
-    driver_name: str
-
-
 class DriverDto(BaseModel):
     id: str
-    driver_name: str
+    name: str
 
     model_config = ConfigDict(from_attributes=True)
+
+    @classmethod
+    def from_entity(cls, entity) -> "DriverDto":
+        return cls(
+            id=str(entity.id),
+            name=entity.driver_name,
+        )

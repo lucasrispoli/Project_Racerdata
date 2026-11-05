@@ -6,9 +6,7 @@ from config.database import Base
 
 
 class Driver(Base):
-    """
-    Entidade Driver: cadastro principal e único dos pilotos
-    """
+ 
     __tablename__ = "driver"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

@@ -3,12 +3,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config.database import engine, Base
-import entity  # Importa o pacote de entidades (Session, Driver, SessionDriver, DashboardDriver)
+import entity  # Importa todas as entidades (Session, Driver, SessionDriver, DashboardDriver)
 
 from controller.session_controller import router as session_router
 from controller.driver_controller import router as driver_router
 from controller.session_driver_controller import router as session_driver_router
-from controller.dashboard_driver_controller import router as dashboard_driver_router, alias_router as alias_dashboard_driver_router
+from controller.dashboard_driver_controller import router as dashboard_driver_router
 from controller.dashboard_controller import router as dashboard_router
 
 
@@ -38,9 +38,8 @@ app.add_middleware(
 
 app.include_router(dashboard_router)
 app.include_router(dashboard_driver_router)
-app.include_router(alias_dashboard_driver_router)
-app.include_router(session_router)
 app.include_router(driver_router)
+app.include_router(session_router)
 app.include_router(session_driver_router)
 
 
