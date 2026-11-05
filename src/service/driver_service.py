@@ -1,66 +1,56 @@
-from typing import List, Optional
+from typing import Optional, List
 from sqlalchemy.orm import Session
-from entity.driver import Driver
-from dto.driver_dto import DriverDto, DriverInputDto
+from entity.models import Driver as DriverModel
 from repository.driver_repository import DriverRepository
+from dto.models_dto import DriverCreateDto, DriverUpdateDto, DriverDto
 
 
 class DriverService:
     def __init__(self, session: Session):
         self._repository = DriverRepository(session)
 
-    def create(self, input_dto: DriverInputDto) -> DriverDto:
-        # Regra de negócio: O sistema não deve armazenar registros duplicados para o mesmo piloto (já existe um com esse nome)
-        existing = self._repository.get_by_name(input_dto.name.strip())
+    def create(self, dto: DriverCreateDto) -> DriverDto:
+        name = dto.driver_name.strip()
+        existing = self._repository.get_by_name(name)
         if existing:
-            raise ValueError(f"Driver '{input_dto.name}' already exists.")
+            raise ValueError(f"Driver '{name}' already exists.")
 
-        driver = Driver(
-            name=input_dto.name.strip(),
-            description=input_dto.description.strip() if input_dto.description else "",
-            active=input_dto.status,
-        )
-        saved = self._repository.create(driver)
-        return DriverDto.from_entity(saved)
+        entity = DriverModel(driver_name=name)
+        saved = self._repository.create(entity)
+        return DriverDto.model_validate(saved)
 
     def get_by_id(self, driver_id: str) -> Optional[DriverDto]:
-        driver = self._repository.get_by_id(driver_id)
-        if not driver:
+        entity = self._repository.get_by_id(driver_id)
+        if not entity:
             return None
-        return DriverDto.from_entity(driver)
+        return DriverDto.model_validate(entity)
+
+    def get_by_name(self, driver_name: str) -> Optional[DriverDto]:
+        entity = self._repository.get_by_name(driver_name)
+        if not entity:
+            return None
+        return DriverDto.model_validate(entity)
 
     def get_all(self, filter_text: Optional[str] = None) -> List[DriverDto]:
-        drivers = self._repository.get_all(filter_text=filter_text)
-        return [DriverDto.from_entity(d) for d in drivers]
+        entities = self._repository.get_all(filter_text=filter_text)
+        return [DriverDto.model_validate(e) for e in entities]
 
-    def update(self, driver_id: str, input_dto: DriverInputDto) -> Optional[DriverDto]:
-        driver = self._repository.get_by_id(driver_id)
-        if not driver:
+    def update(self, driver_id: str, dto: DriverUpdateDto) -> Optional[DriverDto]:
+        entity = self._repository.get_by_id(driver_id)
+        if not entity:
             return None
 
-        # Validação de duplicidade caso esteja alterando o nome
-        existing = self._repository.get_by_name(input_dto.name.strip())
-        if existing and str(existing.id) != str(driver.id):
-            raise ValueError(f"Driver '{input_dto.name}' already exists.")
+        name = dto.driver_name.strip()
+        existing = self._repository.get_by_name(name)
+        if existing and str(existing.id) != str(entity.id):
+            raise ValueError(f"Driver '{name}' already exists.")
 
-        driver.name = input_dto.name.strip()
-        driver.description = input_dto.description.strip() if input_dto.description else ""
-        driver.active = input_dto.status
-
-        updated = self._repository.update(driver)
-        return DriverDto.from_entity(updated)
-
-    def change_status(self, driver_id: str, status: bool) -> Optional[DriverDto]:
-        driver = self._repository.get_by_id(driver_id)
-        if not driver:
-            return None
-
-        driver.active = status
-        updated = self._repository.update(driver)
-        return DriverDto.from_entity(updated)
+        entity.driver_name = name
+        updated = self._repository.update(entity)
+        return DriverDto.model_validate(updated)
 
     def delete(self, driver_id: str) -> bool:
-        driver = self._repository.get_by_id(driver_id)
-        if not driver:
+        entity = self._repository.get_by_id(driver_id)
+        if not entity:
             return False
-        return self._repository.delete(driver)
+        return self._repository.delete(entity)

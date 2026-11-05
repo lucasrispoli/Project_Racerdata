@@ -3,23 +3,29 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config.database import engine, Base
-import entity.driver  # Registra os modelos SQLAlchemy
+import entity.models  # Registra todas as entidades SQLAlchemy no Base metadata
+
+from controller.session_controller import router as session_router
 from controller.driver_controller import router as driver_router
+from controller.session_driver_controller import router as session_driver_router
+from controller.dashboard_driver_controller import router as dashboard_driver_router, alias_router as alias_dashboard_driver_router
+from controller.dashboard_controller import router as dashboard_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Inicializa as tabelas no PostgreSQL se não existirem
     try:
         Base.metadata.create_all(bind=engine)
     except Exception as e:
-        print(f"Warning: Database connection failed during startup: {e}")
+        print(f"Warning: Could not connect or create tables on startup: {e}")
     yield
 
 
 app = FastAPI(
     title="RACERDATA API",
-    description="API de gerenciamento de pilotos e dados de corrida",
-    version="2.0.0",
+    description="API de sessões, pilotos e dashboard da Fórmula 1 integrada à OpenF1",
+    version="2.1.0",
     lifespan=lifespan,
 )
 
@@ -31,12 +37,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Registra todos os controllers requeridos
+app.include_router(dashboard_router)
+app.include_router(dashboard_driver_router)
+app.include_router(alias_dashboard_driver_router)
+app.include_router(session_router)
 app.include_router(driver_router)
+app.include_router(session_driver_router)
 
 
 @app.get("/", tags=["Health"])
 def health_check():
-    return {"status": "ok", "app": "RACERDATA API", "version": "2.0.0"}
+    return {"status": "ok", "app": "RACERDATA API", "version": "2.1.0"}
 
 
 if __name__ == "__main__":

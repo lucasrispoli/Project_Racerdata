@@ -1,36 +1,36 @@
-from typing import List, Optional
+from typing import Optional, List
 from sqlalchemy.orm import Session
-from entity.driver import Driver
+from entity.models import Driver as DriverModel
 
 
 class DriverRepository:
     def __init__(self, session: Session):
-        self._session = session
+        self._db = session
 
-    def get_by_id(self, driver_id: str) -> Optional[Driver]:
-        return self._session.query(Driver).filter(Driver.id == driver_id).first()
+    def get_by_id(self, driver_id: str) -> Optional[DriverModel]:
+        return self._db.query(DriverModel).filter(DriverModel.id == driver_id).first()
 
-    def get_by_name(self, name: str) -> Optional[Driver]:
-        return self._session.query(Driver).filter(Driver.name == name).first()
+    def get_by_name(self, driver_name: str) -> Optional[DriverModel]:
+        return self._db.query(DriverModel).filter(DriverModel.driver_name == driver_name).first()
 
-    def get_all(self, filter_text: Optional[str] = None) -> List[Driver]:
-        query = self._session.query(Driver)
+    def get_all(self, filter_text: Optional[str] = None) -> List[DriverModel]:
+        query = self._db.query(DriverModel)
         if filter_text:
-            query = query.filter(Driver.name.ilike(f"%{filter_text}%"))
-        return query.all()
+            query = query.filter(DriverModel.driver_name.ilike(f"%{filter_text}%"))
+        return query.order_by(DriverModel.driver_name.asc()).all()
 
-    def create(self, driver: Driver) -> Driver:
-        self._session.add(driver)
-        self._session.commit()
-        self._session.refresh(driver)
-        return driver
+    def create(self, driver_entity: DriverModel) -> DriverModel:
+        self._db.add(driver_entity)
+        self._db.commit()
+        self._db.refresh(driver_entity)
+        return driver_entity
 
-    def update(self, driver: Driver) -> Driver:
-        self._session.commit()
-        self._session.refresh(driver)
-        return driver
+    def update(self, driver_entity: DriverModel) -> DriverModel:
+        self._db.commit()
+        self._db.refresh(driver_entity)
+        return driver_entity
 
-    def delete(self, driver: Driver) -> bool:
-        self._session.delete(driver)
-        self._session.commit()
+    def delete(self, driver_entity: DriverModel) -> bool:
+        self._db.delete(driver_entity)
+        self._db.commit()
         return True
