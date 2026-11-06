@@ -19,19 +19,21 @@ def get_service(db: Session = Depends(get_db)) -> SessionDriverService:
 def get_drivers_for_line_chart(
     date_from: Optional[str] = Query(None, description="Data inicial no formato YYYY-MM-DD"),
     date_to: Optional[str] = Query(None, description="Data final no formato YYYY-MM-DD"),
+    session_type: Optional[str] = Query(None, description="Tipo de sessao (ex: Race, Qualifying, Practice 1)"),
     service: SessionDriverService = Depends(get_service)
 ):
-    return service.get_drivers_for_line_chart(date_from=date_from, date_to=date_to)
+    return service.get_drivers_for_line_chart(date_from=date_from, date_to=date_to, session_type=session_type)
 
 
 @router.get("/results", response_model=List[SessionDriverResultsDto])
 def get_all_results(
-    year: Optional[int] = Query(None, description="Filtrar por ano da sessão"),
+    year: Optional[int] = Query(None, description="Filtrar por ano da sessao"),
     date_from: Optional[str] = Query(None, description="Data inicial no formato YYYY-MM-DD"),
     date_to: Optional[str] = Query(None, description="Data final no formato YYYY-MM-DD"),
+    session_type: Optional[str] = Query(None, description="Tipo de sessao (ex: Race, Qualifying, Practice 1)"),
     service: SessionDriverService = Depends(get_service)
 ):
-    return service.get_all_results(year=year, date_from=date_from, date_to=date_to)
+    return service.get_all_results(year=year, date_from=date_from, date_to=date_to, session_type=session_type)
 
 
 @router.get("", response_model=List[SessionDriverDto])

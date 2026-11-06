@@ -99,14 +99,9 @@ class DataCollectionService:
                 # Salva ou atualiza Session
                 session_obj = self._sync_session(session_data, summary)
 
-                # Pequeno delay preventivo para respeitar o limite de taxa da OpenF1
-                time.sleep(0.3)
-
                 # Busca dados de drivers da sessão
                 drivers_data = self._fetch_session_drivers(session_key)
                 summary.drivers_found += len(drivers_data)
-
-                time.sleep(0.3)
 
                 # Busca dados de session_result da sessão
                 results_data = self._fetch_session_results(session_key)
@@ -147,7 +142,7 @@ class DataCollectionService:
         return [
             session_data
             for session_data in sessions_data
-            if session_data.get("session_type") in ("Race", "Qualifying")
+            if session_data.get("session_type") in ("Race")
             and session_data.get("session_key") is not None
         ]
 
@@ -294,10 +289,10 @@ class DataCollectionService:
         if driver_obj:
             return driver_obj
 
-        driver_obj = self._driver_repo.get_by_name(full_name)
+        driver_obj = self._driver_repo.get_by_name(full_name.upper())
         if not driver_obj:
             driver_obj = self._driver_repo.create(
-                DriverModel(driver_name=full_name)
+                DriverModel(driver_name=full_name.upper())
             )
             summary.drivers_new += 1
 

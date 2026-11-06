@@ -35,7 +35,12 @@ class SessionDriverRepository:
             query = query.filter(SessionDriverModel.team_name.ilike(f"%{filter_text}%"))
         return query.all()
 
-    def get_by_date_range(self, date_from: Optional[str] = None, date_to: Optional[str] = None) -> List[SessionDriverModel]:
+    def get_by_date_range(
+        self,
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
+        session_type: Optional[str] = None
+    ) -> List[SessionDriverModel]:
         query = (
             self._db.query(SessionDriverModel)
             .join(SessionDriverModel.session)
@@ -45,13 +50,16 @@ class SessionDriverRepository:
             query = query.filter(SessionModel.date_end >= date_from)
         if date_to:
             query = query.filter(SessionModel.date_end <= date_to)
+        if session_type:
+            query = query.filter(SessionModel.session_type.ilike(f"%{session_type}%"))
         return query.order_by(SessionModel.date_end.asc()).all()
 
     def get_all_results(
         self,
         year: Optional[int] = None,
         date_from: Optional[str] = None,
-        date_to: Optional[str] = None
+        date_to: Optional[str] = None,
+        session_type: Optional[str] = None
     ) -> List[SessionDriverModel]:
         query = (
             self._db.query(SessionDriverModel)
@@ -64,6 +72,8 @@ class SessionDriverRepository:
             query = query.filter(SessionModel.date_end >= date_from)
         if date_to:
             query = query.filter(SessionModel.date_end <= date_to)
+        if session_type:
+            query = query.filter(SessionModel.session_type.ilike(f"%{session_type}%"))
         return query.order_by(SessionModel.year.desc(), SessionModel.date_end.asc()).all()
 
     def create(self, entity: SessionDriverModel) -> SessionDriverModel:

@@ -33,17 +33,22 @@ class SessionDriverService:
     def get_drivers_for_line_chart(
         self,
         date_from: Optional[str] = None,
-        date_to: Optional[str] = None
+        date_to: Optional[str] = None,
+        session_type: Optional[str] = None
     ) -> List[SessionDriverLineChartDto]:
-        # Regra de negócio: apenas pilotos em DashboardDriver com isActive = True
+        # Regra de negocio: apenas pilotos em DashboardDriver com isActive = True
         active_dash_drivers = self._dash_driver_repo.get_active_drivers()
         if not active_dash_drivers:
             return []
 
         active_driver_map = {d.driver_id: d for d in active_dash_drivers}
 
-        # Regra de negócio: filtrar dados entre date_from e date_to
-        session_driver_records = self._repository.get_by_date_range(date_from=date_from, date_to=date_to)
+        # Regra de negocio: filtrar dados entre date_from e date_to, e por session_type
+        session_driver_records = self._repository.get_by_date_range(
+            date_from=date_from,
+            date_to=date_to,
+            session_type=session_type
+        )
 
         grouped_points: Dict[str, List[LineChartPointDto]] = {d.driver_id: [] for d in active_dash_drivers}
 
@@ -89,10 +94,16 @@ class SessionDriverService:
         self,
         year: Optional[int] = None,
         date_from: Optional[str] = None,
-        date_to: Optional[str] = None
+        date_to: Optional[str] = None,
+        session_type: Optional[str] = None
     ) -> List[SessionDriverResultsDto]:
-        # Regra de negócio: filtrar resultados entre date_from e date_to (e opcionalmente year)
-        records = self._repository.get_all_results(year=year, date_from=date_from, date_to=date_to)
+        # Regra de negocio: filtrar resultados entre date_from e date_to (e opcionalmente year e session_type)
+        records = self._repository.get_all_results(
+            year=year,
+            date_from=date_from,
+            date_to=date_to,
+            session_type=session_type
+        )
 
         # Agrupa por year -> session_id
         grouped: Dict[int, Dict[str, SessionResultDetailDto]] = {}
