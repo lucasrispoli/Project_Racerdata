@@ -37,9 +37,9 @@ Isso irá:
 docker compose ps
 ```
 
-A API estará disponível em: [http://localhost:8000](http://localhost:8000)
+A API estará disponível em: [http://localhost:8080](http://localhost:8080)
 
-Documentação interativa (Swagger): [http://localhost:8000/docs](http://localhost:8000/docs)
+Documentação interativa (Swagger): [http://localhost:8080/docs](http://localhost:8080/docs)
 
 ---
 
