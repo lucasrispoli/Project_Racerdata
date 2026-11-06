@@ -14,7 +14,7 @@ class SessionService:
         if not entity:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Session with id '{session_id}' not found."
+                detail=f"Sessão com id '{session_id}' não encontrada."
             )
         return SessionDto.from_entity(entity)
 
@@ -31,7 +31,7 @@ class SessionService:
         if not entity:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Session with session_key '{session_key}' not found."
+                detail=f"Sessão com session_key '{session_key}' não encontrada."
             )
         return SessionDto.from_entity(entity)
 

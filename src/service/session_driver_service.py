@@ -1,4 +1,5 @@
 from typing import Optional, List, Dict
+from datetime import date
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from repository.session_driver_repository import SessionDriverRepository
@@ -22,7 +23,7 @@ class SessionDriverService:
         if not entity:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"SessionDriver with id '{session_driver_id}' not found."
+                detail=f"SessionDriver com id '{session_driver_id}' não encontrado."
             )
         return SessionDriverDto.from_entity(entity)
 
@@ -36,6 +37,18 @@ class SessionDriverService:
         date_to: Optional[str] = None,
         session_type: Optional[str] = None
     ) -> List[SessionDriverLineChartDto]:
+
+        if date_from and date_to:
+            start_date = date.fromisoformat(date_from)
+            end_date = date.fromisoformat(date_to)
+
+        if start_date > end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="O campo 'De:' não pode ter uma data maior do que o campo 'Até:'."
+            )
+
+
         # Regra de negocio: apenas pilotos em DashboardDriver com isActive = True
         active_dash_drivers = self._dash_driver_repo.get_active_drivers()
         if not active_dash_drivers:
@@ -50,7 +63,8 @@ class SessionDriverService:
             session_type=session_type
         )
 
-        grouped_points: Dict[str, List[LineChartPointDto]] = {d.driver_id: [] for d in active_dash_drivers}
+        grouped_points: Dict[str, List[LineChartPointDto]] = {
+            d.driver_id: [] for d in active_dash_drivers}
 
         for record in session_driver_records:
             if record.driver_id in active_driver_map:
@@ -136,7 +150,8 @@ class SessionDriverService:
                 car_number=record.car_number,
                 driver_position=record.driver_position if record.driver_position is not None else record.car_number,
             )
-            grouped[sess_year][sess_id].drivers_positions_dto.append(driver_position_dto)
+            grouped[sess_year][sess_id].drivers_positions_dto.append(
+                driver_position_dto)
 
         final_list: List[SessionDriverResultsDto] = []
         for yr, sessions_dict in grouped.items():

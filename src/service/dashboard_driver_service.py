@@ -18,14 +18,14 @@ class DashboardDriverService:
         if not driver:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Driver with id '{dto.driver_id}' not found."
+                detail=f"Piloto com o id '{dto.driver_id}' não encontrado."
             )
 
         existing = self._repository.get_by_driver_id(dto.driver_id)
         if existing:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"DashboardDriver configuration for driver '{driver.driver_name}' already exists."
+                detail=f"Configuração de dashboard para o piloto '{dto.driver_id}' já existe."
             )
 
         entity = DashboardDriverModel(
@@ -42,7 +42,7 @@ class DashboardDriverService:
         if not entity:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"DashboardDriver with id '{dashboard_driver_id}' not found."
+                    detail=f"Piloto com o id '{dashboard_driver_id}' não encontrado."
             )
         return DashboardDriverDto.from_entity(entity)
 
@@ -55,7 +55,7 @@ class DashboardDriverService:
         if not entity:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"DashboardDriver with id '{dashboard_driver_id}' not found."
+                    detail=f"Piloto com o id '{dto.driver_id}' não encontrado."
             )
 
         if dto.driver_id != entity.driver_id:
@@ -63,13 +63,13 @@ class DashboardDriverService:
             if not driver:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Driver with id '{dto.driver_id}' not found."
+                    detail=f"Piloto com o id '{dto.driver_id}' não encontrado."
                 )
             existing = self._repository.get_by_driver_id(dto.driver_id)
             if existing and existing.id != entity.id:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"DashboardDriver configuration for driver '{dto.driver_id}' already exists."
+                    detail=f"Configuração de dashboard para o piloto '{dto.driver_id}' já existe."
                 )
             entity.driver_id = dto.driver_id
 
@@ -85,7 +85,7 @@ class DashboardDriverService:
         if not entity:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"DashboardDriver with id '{dashboard_driver_id}' not found."
+                detail=f"Piloto com o id '{dashboard_driver_id}' não encontrado"
             )
         entity.isActive = is_active
         updated = self._repository.update(entity)
@@ -96,6 +96,6 @@ class DashboardDriverService:
         if not entity:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"DashboardDriver with id '{dashboard_driver_id}' not found."
+                detail=f"Piloto com o id '{dashboard_driver_id}' não encontrado"
             )
         self._repository.delete(entity)
