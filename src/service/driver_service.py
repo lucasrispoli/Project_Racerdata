@@ -14,7 +14,7 @@ class DriverService:
         if not entity:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Piloto com o id '{driver_id}' não encontrado."
+                detail=f"Piloto não encontrado."
             )
         return DriverDto.from_entity(entity)
 
